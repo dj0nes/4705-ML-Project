@@ -5,17 +5,15 @@ Created on Fri Apr 24 14:10:30 2015
 @author: Sufian
 """
 
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from xlrd import open_workbook
 from sklearn.metrics import r2_score
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge
 from sklearn import linear_model
-from sklearn.linear_model import LassoLarsCV
-from sklearn.cross_validation import cross_val_predict
-#from sklearn import datasets
+from sklearn.linear_model import RidgeCV
 
+#from sklearn import datasets
 wbfeatures = open_workbook('Sarcos_Data1_train__X.xlsx');
 wbtarget = open_workbook('Sarcos_Data1_train__y.xlsx');
 wbtestfeatures = open_workbook('Sarcos_Data1_test_X.xlsx');
@@ -67,7 +65,7 @@ test_targets = targets_test_data
 
 #Ridge
 #Cross-validation to set a parameter
-ridge = linear_model.RidgeCV(cv=10)
+ridge = linear_model.RidgeCV()
 ridge.fit(train_features, train_targets)
 # The estimator chose automatically its lambda: 
 tune_parameter = ridge.alpha_
@@ -76,8 +74,6 @@ print("Tuned parameter obtained using cross validation : %f" % tune_parameter)
 Cross_validation_perfomance = ridge.score(test_features, test_targets)
 print("Cross validation perfomance : %f" % Cross_validation_perfomance)
 
-from sklearn.linear_model import Ridge
-
 alpha = tune_parameter 
 ridge = Ridge(alpha=alpha)
 
@@ -85,8 +81,37 @@ y_pred_ridge = ridge.fit(train_features, train_targets).predict(test_features)
 r2_score_ridge = r2_score(test_targets, y_pred_ridge)
 print(ridge)
 print("r^2 on test data : %f" % r2_score_ridge)
-plt.plot(ridge.coef_, label='Ridge coefficients')
-plt.legend(loc='best')
+
+###############################################################################
+
+# RidgeCV
+
+# Compute paths
+model = RidgeCV(cv=None,store_cv_values=True)
+model.fit(train_features, train_targets)
+
+
+# Display results
+m_log_alphas = -np.log10(model.cv_values_)
+
+# Lasso on testing data using learning technique from training data
+m_log_alphas_modified = np.delete(m_log_alphas, 0)
+#print(m_log_alphas_modified)
+
+r2_values_store = []
+
+for alphas in m_log_alphas_modified:
+    alpha = alphas
+    ridge = Ridge(alpha=alpha)
+    y_pred_ridge = ridge.fit(train_features, train_targets).predict(test_features)
+    r2_score_ridge = r2_score(test_targets, y_pred_ridge)
+    r2_values_store.append(r2_score_ridge)
+#print(r2_values_store)
+plt.figure()
+#plt.figure(figsize=(16,9), dpi=1200) # used to expose the figure at higher resolution 
+plt.plot(m_log_alphas_modified, r2_values_store)
+plt.xlabel('alpha values')
+plt.ylabel('R^2 values')
 plt.show()
 
 ###############################################################################
