@@ -74,13 +74,26 @@ print("Tuned parameter obtained using cross validation : %f" % tune_parameter)
 Cross_validation_perfomance = ridge.score(test_features, test_targets)
 print("Cross validation perfomance : %f" % Cross_validation_perfomance)
 
+#alpha = tune_parameter 
 alpha = tune_parameter 
 ridge = Ridge(alpha=alpha)
+#ridge_tuned = Ridge(alpha=152)
+
+y_pred_ridge = ridge.fit(train_features, train_targets).predict(test_features)
+#y_pred_ridge_tuned = ridge_tuned.fit(train_features, train_targets).predict(test_features)
+r2_score_ridge = r2_score(test_targets, y_pred_ridge)
+#r2_score_ridge_tuned = r2_score(test_targets, y_pred_ridge)
+print(ridge)
+#print(ridge_tuned)
+print("r^2 on test data : %f" % r2_score_ridge)
+
+
+"""ridge = Ridge(alpha=152)
 
 y_pred_ridge = ridge.fit(train_features, train_targets).predict(test_features)
 r2_score_ridge = r2_score(test_targets, y_pred_ridge)
 print(ridge)
-print("r^2 on test data : %f" % r2_score_ridge)
+print("r^2 on test data : %f" % r2_score_ridge)"""
 
 ###############################################################################
 
